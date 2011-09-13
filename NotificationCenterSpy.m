@@ -34,6 +34,7 @@
 - (void)spyNotificationName:(NSString *)aName object:(id)anObject userInfo:(NSDictionary *)aUserInfo {
     NSLog(@"Posting notification %@", aName);
 
+	// Call default implementation
     [self spyNotificationName:aName object:anObject userInfo:aUserInfo];
 }
 
