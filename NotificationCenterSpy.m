@@ -5,37 +5,48 @@
 //
 
 #import "NotificationCenterSpy.h"
-#import <objc/runtime.h> 
-#import <objc/message.h>
 
-@implementation NSNotificationCenter (NotificationCenterSpy)
+static NotificationCenterSpy *sharedInstance = nil;
 
-+ (void)swizzleMethods {
-    Class c = [NSNotificationCenter class];
-    SEL originalMethodSelector = @selector(postNotificationName:object:userInfo:);
-    SEL newMethodSelector = @selector(spyNotificationName:object:userInfo:);
-    
-    Method newMethodImp = class_getInstanceMethod(self, newMethodSelector);
-    if (newMethodImp != NULL) {
-        class_addMethod(c, newMethodSelector, method_getImplementation(newMethodImp), method_getTypeEncoding(newMethodImp));
-        newMethodImp = class_getInstanceMethod(c, newMethodSelector);
-        
-        if (newMethodImp != NULL) {
-            Method originalMethodImp = class_getInstanceMethod(c, originalMethodSelector);
-            method_exchangeImplementations(originalMethodImp, newMethodImp);
-        }
-    }
+@interface NotificationCenterSpy ()
+
+@property (nonatomic, assign, getter=isSpying) BOOL spying;
+- (void)toggleSpyingAllNotifications;
+
+@end
+
+@implementation NotificationCenterSpy
+
++ (NotificationCenterSpy *)sharedNotificationCenterSpy {
+	
+	static dispatch_once_t sharedToken;
+	dispatch_once(&sharedToken, ^{
+		sharedInstance = [[self alloc] init];
+	});
+	
+    return sharedInstance;
 }
 
 + (void)toggleSpyingAllNotifications {    
-    [self swizzleMethods];    
+    [[self sharedNotificationCenterSpy] toggleSpyingAllNotifications];
 }
 
-- (void)spyNotificationName:(NSString *)aName object:(id)anObject userInfo:(NSDictionary *)aUserInfo {
-    NSLog(@"Posting notification %@", aName);
+- (void)toggleSpyingAllNotifications {
+	
+	NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
+	
+	if (self.spying) {
+		[nc removeObserver:self];
+		self.spying = NO;
+	} else { 
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(receivedNotification:) name:nil object:nil];
+		self.spying = YES;
+	}
+}
 
-    // Call default implementation
-    [self spyNotificationName:aName object:anObject userInfo:aUserInfo];
+- (void)receivedNotification:(NSNotification *)notification {
+	NSLog(@"Received notification: %@", [notification name]);
+	//NSLog(@"Received notification: %@ from object: %@", [notification name], [notification object]);
 }
 
 @end

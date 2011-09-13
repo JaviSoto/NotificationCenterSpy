@@ -13,7 +13,7 @@
 
 #import <Foundation/Foundation.h>
 
-@interface NSNotificationCenter (NotificationCenterSpy)
+@interface NotificationCenterSpy : NSObject
 
 + (void)toggleSpyingAllNotifications;
 
