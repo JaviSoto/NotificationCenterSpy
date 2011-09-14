@@ -8,7 +8,7 @@
 //
 //  Usage:
 //  #import NotificationCenterSpy.h
-//  [NSNotificationCenter toggleSpyingAllNotifications] to enable NSLogging all notifications being posted.
+//  [NSNotificationCenterSpy toggleSpyingAllNotifications] to enable NSLogging all notifications being posted.
 //  Call the method again to disable
 
 #import <Foundation/Foundation.h>
